@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import fetch from "node-fetch";
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
@@ -16,28 +17,28 @@ app.use(cors());
 let pagesCache = new Map(); // Use Map for O(1) lookups instead of O(n)
 let pagesLoadedAt = null;
 
-// Load pages data once at startup
-const pagesPath = join(__dirname, 'data/pages.js');
-
 async function loadPagesIntoCache() {
   try {
-    // Add cache-busting query param to force reload
-    const cacheBuster = `?t=${Date.now()}`;
-    const module = await import(`file://${pagesPath}${cacheBuster}`);
-    const pages = module.pages;
+    const url = `https://faltapoco.com/pages.json?t=${Date.now()}`; // cache-busting
+    const res = await fetch(url);
 
-    // Convert to Map for fast lookups by slug
+    if (!res.ok) throw new Error("Failed to fetch remote pages.json");
+
+    const pages = await res.json();
+
     pagesCache.clear();
     Object.entries(pages).forEach(([key, pageData]) => {
       pagesCache.set(pageData.meta.slug, pageData);
     });
 
     pagesLoadedAt = new Date();
-    console.log(`✅ Loaded ${pagesCache.size} pages into cache at ${pagesLoadedAt.toISOString()}`);
+    console.log(`✅ Loaded ${pagesCache.size} pages from remote JSON`);
+
     return pagesCache;
-  } catch (error) {
-    console.error('❌ Error loading pages:', error);
-    throw error;
+
+  } catch (err) {
+    console.error("❌ Error loading remote pages.json:", err);
+    throw err;
   }
 }
 
