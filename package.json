@@ -1,0 +1,17 @@
+{
+  "name": "faltapoco-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "api": "node --watch index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.20.0",
+  "devDependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.2.1"
+  }
+}
